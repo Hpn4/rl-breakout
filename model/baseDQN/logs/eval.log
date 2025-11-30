@@ -1,0 +1,78 @@
+[yellow]== EVAL[/] 1 Q: 0.028963448479771614, reward: 0.0
+[yellow]== EVAL[/] 2 Q: 0.028963448479771614, reward: 1.8
+[green]New best model saved, R: 1.8[/]
+[yellow]== EVAL[/] 3 Q: 0.028963448479771614, reward: 3.6
+[green]New best model saved, R: 3.6[/]
+[yellow]== EVAL[/] 4 Q: 0.030038444325327873, reward: 0.0
+[yellow]== EVAL[/] 5 Q: 0.059305425733327866, reward: 0.0
+[yellow]== EVAL[/] 6 Q: 0.11174619942903519, reward: 4.4
+[green]New best model saved, R: 4.4[/]
+[yellow]== EVAL[/] 7 Q: 0.10602126270532608, reward: 0.0
+[yellow]== EVAL[/] 8 Q: 0.1385030746459961, reward: 0.8
+[yellow]== EVAL[/] 9 Q: 0.1564377248287201, reward: 0.0
+[yellow]== EVAL[/] 10 Q: 0.1728934496641159, reward: 3.6
+[yellow]== EVAL[/] 11 Q: 0.215768963098526, reward: 0.0
+[yellow]== EVAL[/] 12 Q: 0.19698230922222137, reward: 0.6
+[yellow]== EVAL[/] 13 Q: 0.22255325317382812, reward: 1.0
+[yellow]== EVAL[/] 14 Q: 0.2432883232831955, reward: 1.8
+[yellow]== EVAL[/] 15 Q: 0.26847678422927856, reward: 2.2
+[yellow]== EVAL[/] 16 Q: 0.279350221157074, reward: 9.2
+[green]New best model saved, R: 9.2[/]
+[yellow]== EVAL[/] 17 Q: 0.294052392244339, reward: 2.2
+[yellow]== EVAL[/] 18 Q: 0.31400981545448303, reward: 6.0
+[yellow]== EVAL[/] 19 Q: 0.36398524045944214, reward: 1.8
+[yellow]== EVAL[/] 20 Q: 0.3970338702201843, reward: 9.4
+[green]New best model saved, R: 9.4[/]
+[yellow]== EVAL[/] 21 Q: 0.4678241014480591, reward: 15.0
+[green]New best model saved, R: 15.0[/]
+[yellow]== EVAL[/] 22 Q: 0.5817200541496277, reward: 7.2
+[yellow]== EVAL[/] 23 Q: 0.7097299695014954, reward: 14.8
+[yellow]== EVAL[/] 24 Q: 0.8185872435569763, reward: 14.4
+[yellow]== EVAL[/] 25 Q: 0.8550411462783813, reward: 15.0
+[yellow]== EVAL[/] 26 Q: 0.9115892052650452, reward: 25.0
+[green]New best model saved, R: 25.0[/]
+[yellow]== EVAL[/] 27 Q: 0.8906276822090149, reward: 24.0
+[yellow]== EVAL[/] 28 Q: 0.9460830092430115, reward: 33.2
+[green]New best model saved, R: 33.2[/]
+[yellow]== EVAL[/] 29 Q: 1.0435817241668701, reward: 34.2
+[green]New best model saved, R: 34.2[/]
+[yellow]== EVAL[/] 30 Q: 1.1513324975967407, reward: 49.0
+[green]New best model saved, R: 49.0[/]
+[yellow]== EVAL[/] 31 Q: 1.2066409587860107, reward: 54.4
+[green]New best model saved, R: 54.4[/]
+[yellow]== EVAL[/] 32 Q: 1.3551664352416992, reward: 43.2
+[yellow]== EVAL[/] 33 Q: 1.4116685390472412, reward: 64.6
+[green]New best model saved, R: 64.6[/]
+[yellow]== EVAL[/] 34 Q: 1.615834355354309, reward: 104.0
+[green]New best model saved, R: 104.0[/]
+[yellow]== EVAL[/] 35 Q: 1.7153282165527344, reward: 77.0
+[yellow]== EVAL[/] 36 Q: 1.8942004442214966, reward: 137.2
+[green]New best model saved, R: 137.2[/]
+[yellow]== EVAL[/] 37 Q: 2.113825798034668, reward: 201.8
+[green]New best model saved, R: 201.8[/]
+[yellow]== EVAL[/] 38 Q: 2.160318374633789, reward: 112.8
+[yellow]== EVAL[/] 39 Q: 2.1777467727661133, reward: 196.2
+[yellow]== EVAL[/] 40 Q: 2.616758346557617, reward: 226.8
+[green]New best model saved, R: 226.8[/]
+[yellow]== EVAL[/] 41 Q: 2.9020845890045166, reward: 167.6
+[yellow]== EVAL[/] 42 Q: 3.097677707672119, reward: 149.8
+[yellow]== EVAL[/] 43 Q: 3.139486074447632, reward: 225.2
+[yellow]== EVAL[/] 44 Q: 3.14347505569458, reward: 206.0
+[yellow]== EVAL[/] 45 Q: 3.296566963195801, reward: 140.0
+[yellow]== EVAL[/] 46 Q: 3.2967770099639893, reward: 205.8
+[yellow]== EVAL[/] 47 Q: 3.588738441467285, reward: 263.8
+[green]New best model saved, R: 263.8[/]
+[yellow]== EVAL[/] 48 Q: 3.7307510375976562, reward: 283.8
+[green]New best model saved, R: 283.8[/]
+[yellow]== EVAL[/] 49 Q: 3.387105941772461, reward: 36.4
+[yellow]== EVAL[/] 50 Q: 3.426126480102539, reward: 258.2
+[yellow]== EVAL[/] 51 Q: 3.3860628604888916, reward: 188.0
+[yellow]== EVAL[/] 52 Q: 3.408303737640381, reward: 274.0
+[yellow]== EVAL[/] 53 Q: 3.530128240585327, reward: 129.0
+[yellow]== EVAL[/] 54 Q: 3.528832197189331, reward: 259.6
+[yellow]== EVAL[/] 55 Q: 3.451967239379883, reward: 261.4
+[yellow]== EVAL[/] 56 Q: 3.2058911323547363, reward: 197.2
+[yellow]== EVAL[/] 57 Q: 3.3356707096099854, reward: 259.4
+[yellow]== EVAL[/] 58 Q: 3.3024778366088867, reward: 216.8
+[yellow]== EVAL[/] 59 Q: 3.139270544052124, reward: 251.0
+[yellow]== EVAL[/] 60 Q: 3.4202256202697754, reward: 280.4
