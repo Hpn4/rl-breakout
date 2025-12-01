@@ -15,25 +15,17 @@ from agent.memory import ReplayMemory
 from agent.agent import build_agent
 from agent.env import build_env
 
-# -------------------------
-# SETUP
-# -------------------------
 cfg = load_config()
 
 log_env, env = build_env()
 
-# -------------------------
-# REPRODUCTABILITY
-# -------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 memory = ReplayMemory(cfg["env"]["memory_capacity"])
 model = build_agent(memory, env.action_space.n, device)
 evaluation = EvaluateDQN(model)
 
-# -------------------------
 # Q Values states
-# -------------------------
 eval_states = []
 
 log_env.set_logging(False)
@@ -48,9 +40,7 @@ eval_states = torch.cat(eval_states).to(device)
 
 log_env.set_model(model, eval_states)
 
-# -------------------------
 # Main Loop
-# -------------------------
 done = True
 end_ep = False
 stuck = 0

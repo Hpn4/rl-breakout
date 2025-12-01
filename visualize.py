@@ -1,17 +1,14 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Load CSV
 models = ["C51", "C51_2", "C51_3", "D3QN", "D3QN2", "D3QN3", "D3QN4", "D3QNPenalty", "FineTune"]
 
 def plot(model_name):
 	df = pd.read_csv(f"model/{model_name}/logs/train.csv")
 
-	# Extract needed columns
-	avg_reward = df["Avg R"] * 5
+	avg_reward = df["Avg R"]
 	avg_q = df["Avg Q"]
 
-	# Create figure with two subplots
 	plt.figure(figsize=(10, 5))
 
 	# Left: Avg Reward
@@ -28,7 +25,6 @@ def plot(model_name):
 	plt.xlabel("Episodes")
 	plt.ylabel("Avg Q")
 
-	# Save to file
 	plt.tight_layout()
 	plt.savefig(f"plots/metrics_plot_{model_name}.png")
 	plt.close()
@@ -36,4 +32,4 @@ def plot(model_name):
 #for model in models:
 #	plot(model)
 
-plot("D3QNPenalty")
+plot("D3QN4")

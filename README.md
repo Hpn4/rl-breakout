@@ -1,134 +1,185 @@
-# Atari breakout
+# Deep Q-Network for Atari Breakout
 
-Best run: 843 points
-![Best](best-videos/best.gif)
+## Overview
 
-Intro: this repo implements some DQN paper to play atari breakout
-- DQN
-- Double
-- Duelling
-- Distributional
-- Noisy Linear (with torchrl)
+This project implements and compares multiple Deep Q-Network (DQN) variants for playing Atari Breakout, achieving a best score of **843 points** with an average evaluation score of **460 points**.
 
-Structure:
+![Best Run](best-videos/best.gif)
+
+### Implemented Algorithms
+- Vanilla DQN (Mnih et al., 2013)
+- Double DQN (van Hasselt et al., 2015)
+- Dueling DQN (Wang et al., 2015)
+- Distributional DQN (C51) (Bellemare et al., 2017)
+- Noisy Networks (Fortunato et al., 2017)
+
+## Project Structure
+
+```
 .
-├── README.md
-├── agent
-│   ├── agent.py
-│   ├── env.py
-│   ├── memory.py
-│   └── model.py
-├── best-videos
-├── config.yaml
-├── convert.sh
-├── copymain.py
-├── main.py
-├── model
-│   ├── run name
-│   │   ├── checkpoints
-│   │   ├── config.yaml
-│   │   ├── logs
-│   │   └── videos
-├── poetry.lock
-├── pyproject.toml
-├── replay.py
-├── test.py
-├── utils.py
-└── visualize.py
+├── agent/
+│   ├── agent.py          # Agent implementation
+│   ├── env.py            # Environment wrapper
+│   ├── memory.py         # Replay buffer
+│   └── model.py          # Neural network architectures
+├── model/
+│   └── [run_name]/	      # There is one folder per run
+│       ├── checkpoints/  # Saved model weights
+│       ├── config.yaml   # Run configuration
+│       ├── logs/         # Training and evaluation metrics
+│       └── videos/       # Evaluation recordings
+├── config.yaml           # Hyperparameters
+├── main.py              # Training script
+├── test.py              # Evaluation script called by the main script
+├── replay.py            # Will load a model and evaluate it / save best videos
+└── visualize.py         # Plotting utilities
+```
 
-Experiments:
+## Methodology
 
-A lot of experiments were made on the vanilla DQN without recording to find the right starting parameters. They can be found in `config.yaml` but here a quick explanation on the choice for the most important one:
+### Hyperparameter Decisions
 
-Episodic life: send a end of episode signal to the agent without reseting the env. Allow the agent to understand that loosing a life is bad and the non env reset allows newt states (because if terminate env on life lose, agent will be stuck with first game step).
+Episodic Life (`episodic_life=True`)
+Sends end-of-episode signals when losing a life without resetting the environment. This approach teaches the agent that losing lives is detrimental. No resetting the env prevents the agent from only experiencing initial game states.
 
-Clipped reward: we can think that if keeping unclipped reward can help the agent tunnel because it will learn that shooting on the same spot will make it gain more points, but actually it will completly disrupt the gradient and the estimation and we see that it converges way slower and the training is more unstable.
+Reward Clipping (`clip_rewards=True`)
+While unclipped rewards might theoretically help the agent learn tunneling strategies, in practice they destabilize training by disrupting gradient flow and Q-value estimation. Clipped rewards produce faster and stable convergence.
 
-Frame skip = 4: when watching training and evaluation videos we see that with frame skip = 4, the speed is really high and the agent miss the ball but only with a small error. So maybe frame skip is too high so we try with 2 and 3. The agent converge way slower so we have not been capable of clearly evaluating. But with reference to other training it seems to perform less. So we keep 4 to have a fast training.
+Frame Skip (`frame_skip=4`)
+Tested values: 2, 3, and 4. While frame skip of 4 occasionally causes the agent to miss the ball by small margins, lower values converge significantly slower without clear performance benefits. Frame skip of 4 was retained.
 
-We have a replay memory of 300k because my laptop has limited RAM. We tried to write to disk and then read dynamically thanks to torchrl but it was very slow.
+Replay Memory (`buffer_size=300k`)
+Limited by hardware constraints. Disk-based replay using TorchRL proved too slow for practical use.
 
-To be a bit less deterministic we set noop to 30. It means that up to 30 no ops actions will be done before starting the game.
+Action Space Randomization (`noop_max=30`)
+Up to 30 no-op actions at episode start reduce determinism.
 
-We tried noisy linear (thanks to torchrl noisy linear) and epsilon greedy and we found that epsilon greedy gaves us more control and reduce the looping problem.
+Exploration Strategy
+Epsilon-greedy exploration outperformed Noisy Networks, providing better control and reducing action looping behaviors as explained at the end of this README.
 
+## Experimental Results
 
-With these parameters set we tested multiple models. Each model was run during a whole night so approximatly 7 hours.
+All models were trained for approximately 7 hours (a whole night) per run due to hardware limitations.
 
-The first was the vanilla DQN from deepmind paper.
+### Vanilla DQN (Baseline)
 
+The standard DQN implementation served as our baseline, achieving stable learning and reaching an average reward of 280 by 30k episodes.
 
-Reading the rainbow article they say that for breakout:
-- PER and multi step decrease performance a lot
-- Noisy linear it's mitigate
-- Double and duelling slightly increase
-- Distributional is a huge gain
+### Distributional DQN (C51)
 
-We started implemeting C51. The big issue is the stability, here the result of the first run:
+According to the Rainbow paper (Hessel et al., 2018), distributional learning provides significant gains on Breakout (as you can see on the last column of the graphics. When removing C51, performance drops so we can think that adding it increase performance).
 
-![C51](plots/metrics_plot_C51.png)
+![Rainbow](plots/rainbow.png)
 
-The reward goes well and then near 10K episode, we got NaN for Q and prediction so likely the gradient has exploded. So we clipped the gradient and the reward and here the second run:
+However, our implementation faced stability challenges.
 
-![C51_2](plots/metrics_plot_C51_2.png)
+**Initial Run:**
+![C51 Run 1](plots/metrics_plot_C51.png)
 
-There is no gradient exploding but the converge is really slow, at 50k episodes the average reward is still 10 likewise for the vanilla dqn it was already at 280 at 30k episodes. Reading articles they say it's better when rewards are not clipped. I tried multiple configurations, number of atoms and atoms range and here is the best run among all my experiments:
+Training progressed well until episode 10k, where gradient explosion caused NaN values in Q-predictions.
 
-![C51_3](plots/metrics_plot_C51_3.png)
+**Stabilized Run:**
+![C51 Run 2](plots/metrics_plot_C51_2.png)
 
-The reward is a little better than the previous version but still really low. Maybe it's not the optimal parameters and with more time i would have found the optimal combination but since i accorded a week on C51 and each runs = a whole night i decided to move on. Also it's possible that my implementation of C51 isn't completly accurate since the article is quite complex.
+After implementing gradient clipping and reward normalization, training stabilized but convergence became extremely slow (average reward of 10 at 50k episodes vs. 280 for vanilla DQN at 30k).
 
-Bringing back the rainbow paper we tried to implement the simplest change so the double DQN and the duelling DQN. Here the result of the first run:
+**Best Configuration:**
+![C51 Run 3](plots/metrics_plot_C51_3.png)
 
-![D3QN](plots/metrics_plot_D3QN.png)
+Despite extensive hyperparameter tuning (atom counts, value ranges), C51 underperformed compared to the simpler DQN architectures. Given the complexity of the paper, our implementation might be not exact. Also with our limited computational budget, we proceeded to evaluate simpler improvements.
 
-The results are promising, the average reward and the Q growth well so maybe with some parameters tweak we can obtain a good run. Here the best run among the parameter tunning:
+### Double Dueling DQN (D3QN)
 
-![D3QN2](plots/metrics_plot_D3QN2.png)
+Based on Rainbow Double and Dueling modifications provide some gains on Breakout. So we combined both techniques.
 
-The average reward is really high. But looking at some videos, we saw that the agent is stuck at the end of the first wall. It starts looping as you can see on the videos:
+**Initial Results:**
+![D3QN Run 1](plots/metrics_plot_D3QN.png)
 
-![looping](plots/looping.gif)
+Promising early results with healthy Q-value growth and increasing average rewards.
 
-And sometimes with a very low probability is reachs the second wall but die instantly because he has no more lives :
+**Optimized Configuration:**
+![D3QN Run 2](plots/metrics_plot_D3QN2.png)
 
-![second_wall](plots/second_wall.gif)
+High average rewards were achieved, but evaluation videos revealed a troublesome issue: action looping.
 
-Reading articles and blog posts some says that the looping problem came from the fact that breakout is deterministic so even with no op there is still only 30 different games and when the epsilon decay became really low the agent will be looping. As for why the agent die directly after the second wall, some says it's because since we take the whole image of the game, the agent can see the score, so it's not exactly the same as the start game since there is some pixels that are different. We tried training longer and changing parameters but we still faced this wall issue. After some times we tested different approach:
-- fine tunning a model already good only on end parties.
-- Adding penalties when loosing a life. So reward -1. In a hope to when the agent pass the second wall to have more life and so can go further. And a looping penatlies. So when the agent does not touch bricks after X step we gave him -1 has a reward.
-- Increase slowy the epsilon until it breaks a brick.
+#### The Looping Problem
 
-1. Fine tunning on end parties
+![Looping Behavior](plots/looping.gif)
 
-The idea is to have a good agent and let it play to fill the replay memory with only end game so when the score is greater than 360 (it's complelty arbitrary). We then train like normal and keep a ratio of full game and only end game. The results were catastrophic the agent forget everything. We tried having more full game than end game, having a small epsilon at the starts, running only on a small number of episodes and so on and the best run we had was this one:
+The agent became stuck in repetitive action patterns jsute after the end of the first wall. Occasionally, it would reach the second wall but immediately lose all remaining lives:
 
-![FineTune](plots/metrics_plot_FineTune.png)
+![Second Wall Failure](plots/second_wall.gif)
 
-As we can see the Q is dropping and the reward is dropping and stabilizing but slowly decreassing (it's an average over 100 episodes but when looking at each episodes the reward was decreassing and sometimes there is only one or two games near 400 and then ppor reward like below 10). As you can see on the following graphics reward are completly unstable:
+Hypothesis:
+- Despite no-op randomization, only 30 unique initial states exist. As epsilon decays, the agent exploits learned patterns that lead to loops.
+- The agent observes the score pixels (through the image), creating different state representations after breaking through walls. This causes policy degradation in novel high-score states.
 
-![FineTune2](plots/metrics_plot2_FineTune.png)
+### Solutions Explored
 
-2. Penalties
+#### 1. Fine-Tuning on End-Game States
 
-We tried adding two penalties, the first when is when the agent lose a life. Since it dies instantly after the second wall because he has no more life, maybe with more lives he can go further so to do so we need to teach him that lives are important.
+Pre-fill replay buffer with high-score experiences (score > 360) and maintain a ratio of full games to end-game states during training.
 
-The second is avoiding him to loop so when looping (we detect it by looking if it has not break a brick after 200 steps). We send -1 reward. We tried combination of the two so with only lives, only looping penalties and both. Both shows the best results:
+![Fine-Tuning Results](plots/metrics_plot_FineTune.png)
 
-![Penalty](plots/metrics_plot2_D3QNPenalty.png)
+Outcome: Catastrophic forgetting occurred despite attempts to balance replay ratios, maintain small epsilon values, and limit training episodes. Q-values and rewards both declined. Rewards were really unstable:
 
-It reachs a better average reward than the D3QN basic and the best evaluation (evaluation is made on 10 complete games) is 385 average reward. We can see on the average Q that the Q drops below 0 at the beginning since it losses a lot of life and then go up because he starts learning to survive.
+![Fine-Tuning Instability](plots/metrics_plot2_FineTune.png)
 
-3. Control the exploration
+#### 2. Penalty-Based Shaping
 
-The idea is to keep the right set of parameters i have that already know how to reach 300-350 reward as average but just increase the exploration when looping. Everytime the agent does not touch a break after 100 steps we increase the epsilon by 0.005 and when he touch a bricks we reset the epsilon at the value it was before. The results were shocking:
+We tried adding two penalties:
 
-![D3QN4](plots/metrics_plot_D3QN4.png)
+Life Loss Penalty (-1 reward): Teach the agent to preserve lives, potentially allowing it to survive longer after breaking through the first wall.
 
-The average reward hit more than 400 and the best evaluation was 460 so it means he achieves to pass the second wall in average. When running the best model with the same strategy of exploration we achieves to get a game with 843 points. Maybe with a better computer i would have trained it longer since it seems it can go up further.
+Loop Detection Penalty (-1 reward): Applied when no bricks are hit for 200 consecutive steps to discourage repetitive behaviors.
 
-In conclusion:
+![Penalty Results](plots/metrics_plot_D3QNPenalty.png)
 
-We achieved a score of 843 points with an average of 460 with a Double Duelling DQN (D3QN) model on breakout with a modified epislon decay. We maybe can achiueve better results with C51 with the correct parameters, train longer our model or switch to another paradigm like PPO. When looking through hugging face i saw people reaching 804 average reward with PPO like this one: https://huggingface.co/cleanrl/Breakout-v5-cleanba_ppo_envpool_impala_atari_wrapper-seed2
+Outcome: Best configuration using both penalties achieved an average evaluation score of 385 (10-game average), better than the standard D3QN. The initial Q-value drop reflects early life losses before the agent learns survival strategies.
 
+#### 3. Adaptive Exploration (Best Solution)
 
+Dynamically adjust epsilon based on agent behavior:
+- Increase epsilon by 0.005 every 100 steps without brick contact
+- Reset epsilon when bricks are hit
+
+![Adaptive Exploration Results](plots/metrics_plot_D3QN4.png)
+
+It gaves the best results with and average reward of **460 points**. So it means it achieves to pass the first wall. When replaying the model we achieved a score of 843 points.
+
+## Future Work
+
+- Performance curves indicate room for improvement with additional compute time.
+- Better hyperparameter search for C51.
+- PPO-based approaches have achieved 804 average reward ([reference](https://huggingface.co/cleanrl/Breakout-v5-cleanba_ppo_envpool_impala_atari_wrapper-seed2)).
+- Larger replay buffers and longer training runs would benefit all approaches.
+
+## References
+
+- Mnih et al. (2013). Playing Atari with Deep Reinforcement Learning.
+- van Hasselt et al. (2015). Deep Reinforcement Learning with Double Q-learning.
+- Wang et al. (2015). Dueling Network Architectures for Deep Reinforcement Learning.
+- Bellemare et al. (2017). A Distributional Perspective on Reinforcement Learning.
+- Hessel et al. (2017). Rainbow: Combining Improvements in Deep Reinforcement Learning.
+- Fortunato et al. (2017). Noisy Networks for Exploration.
+- Schaul et al. (2015). Prioritized Experience Replay.
+- De La Fuente et al. (2024). A Comparative Study of Deep Reinforcement Learning Models: DQN vs PPO vs A2C.
+
+## Installation & Usage
+
+```bash
+# Install dependencies
+poetry install
+
+# Train model
+python main.py
+
+# Evaluate trained model (you need to change the path of the model that will be loaded inside the script)
+python replay.py
+
+# Visualize metrics
+python visualize.py
+```
+
+See `config.yaml` for all available hyperparameters.
