@@ -68,7 +68,7 @@ class ReplayDQN():
 
             if glitch and counter % 200 == 0:
                 eps += 0.01
-            if counter > 200:
+            if counter > 5000:
                 print("possibly looping")
                 break
     
@@ -87,7 +87,7 @@ print(device, use_cuda)
 # Load model
 model = build_agent(None, 4, device)
 #model.policy_net.load_state_dict(torch.load("model/D3QN4/checkpoints/best-train-806.0.pth"))
-model.policy_net.load_state_dict(torch.load("model/D3QN4/checkpoints/best.pth"))
+model.policy_net.load_state_dict(torch.load("model/D3QN4/checkpoints/best.pth", map_location=device))
 model.policy_net.eval()
 
 replay = ReplayDQN(model)
@@ -99,9 +99,9 @@ avg = []
 best = 0
 
 for _ in range(N):
-    rr = replay.run(best, 0.0, False)
+    rr = replay.run(best, 0.0, True)
 
-    if rr > best:
+    if rr > best or (rr > 432 and rr < 500):
         best = rr
         print(f"======== BEST: {best} =========")
         os.rename("best-videos/eval--episode-0.mp4", "best.mp4")
